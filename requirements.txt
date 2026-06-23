@@ -1,0 +1,11 @@
+openai-whisper
+ollama
+moviepy
+opencv-python
+mediapipe
+streamlit
+plotly
+pandas
+numpy
+fpdf2
+pytest
