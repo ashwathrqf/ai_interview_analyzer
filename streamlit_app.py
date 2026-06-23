@@ -20,6 +20,7 @@ from vision.smile_detection import detect_smile_frequency
 from llm.evaluate_answer import evaluate_answer
 from llm.resume_match import extract_resume_text, evaluate_against_resume
 from report.scorer import calculate_overall_score
+from report.pdf_export import export_report_pdf
 
 
 PRESET_QUESTIONS = [
@@ -218,3 +219,20 @@ if "results" in st.session_state:
 
             st.subheader("Summary")
             st.write(r["resume_result"]["summary"])
+
+    # --- PDF export ---
+    st.divider()
+    if st.button("Generate PDF report"):
+        pdf_dir = tempfile.mkdtemp()
+        pdf_path = os.path.join(pdf_dir, "interview_report.pdf")
+        export_report_pdf(r, pdf_path)
+        with open(pdf_path, "rb") as f:
+            st.session_state["pdf_bytes"] = f.read()
+
+    if "pdf_bytes" in st.session_state:
+        st.download_button(
+            label="Download PDF report",
+            data=st.session_state["pdf_bytes"],
+            file_name="interviewiq_report.pdf",
+            mime="application/pdf",
+        )

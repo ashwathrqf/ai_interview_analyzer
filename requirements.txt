@@ -10,3 +10,4 @@ numpy
 fpdf2
 pytest
 pdfplumber
+reportlab

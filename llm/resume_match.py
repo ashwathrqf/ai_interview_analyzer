@@ -88,16 +88,29 @@ def _extract_json(raw_response: str) -> dict:
 
 
 def _significant_words(text: str) -> set:
-    """Return lowercased words from text, excluding short/common filler words,
-    used for a lightweight overlap check between a claim and the transcript.
+    """Return lowercased words from text, excluding short/common filler words
+    AND generic domain vocabulary that appears throughout a quant/ML/finance
+    resume regardless of which specific project is being discussed. Matching
+    only on these generic words gives false positive "support" for vague
+    statements that don't actually reference any specific resume claim.
     """
     stopwords = {
         "the", "a", "an", "and", "or", "to", "of", "in", "on", "for", "with",
         "is", "was", "were", "be", "been", "this", "that", "i", "my", "me",
         "it", "as", "at", "by", "from", "using",
     }
+    generic_domain_words = {
+        "quantitative", "finance", "financial", "machine", "learning", "data",
+        "analytics", "model", "models", "modeling", "engineering", "engineer",
+        "project", "projects", "skill", "skills", "experience", "team",
+        "develop", "developed", "develops", "build", "built", "design",
+        "designed", "work", "working", "technical", "technology",
+    }
     words = re.findall(r"[a-z0-9]+", text.lower())
-    return {w for w in words if w not in stopwords and len(w) > 2}
+    return {
+        w for w in words
+        if w not in stopwords and w not in generic_domain_words and len(w) > 2
+    }
 
 
 def _has_transcript_support(claim: str, transcript: str, min_overlap: int = 2) -> bool:
@@ -128,6 +141,9 @@ def _verify_well_substantiated(result: dict, transcript: str, resume_text: str) 
 
     for claim in result.get("well_substantiated", []):
         supported_by_transcript = _has_transcript_support(claim, transcript)
+        # Resume side: after filtering generic domain vocabulary, any
+        # remaining overlap is a much stronger signal, but still require 2
+        # to guard against a single coincidental shared word (e.g. a name).
         supported_by_resume = _has_transcript_support(claim, resume_text, min_overlap=2)
 
         if supported_by_transcript and supported_by_resume:
