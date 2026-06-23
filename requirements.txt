@@ -2,10 +2,11 @@ openai-whisper
 ollama
 moviepy
 opencv-python
-mediapipe
+mediapipe==0.10.21
 streamlit
 plotly
 pandas
 numpy
 fpdf2
 pytest
+pdfplumber
